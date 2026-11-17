@@ -452,9 +452,9 @@
 
 <script>
 (function() {
-  // ДЕФОЛТНЫЙ КОНФИГ (19 позиций)
+    // ДЕФОЛТНЫЙ КОНФИГ (Демо-данные для GitHub)
   const defaultConfig = {
-    version: 7,
+    version: 8, // Подняли версию, чтобы демо-данные подхватились у всех
     widgetWidth: 380,
     widgetFontSize: 16,
     widgetFontFamily: "'Segoe UI', sans-serif",
@@ -472,28 +472,24 @@
     autoHide: true,
     qrLayout: "horizontal",
     services: [
-      {"name":"МКА","price":"1600 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"МКА ТЕКИЛЫ","price":"2500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"МКА АБСЕНТА","price":"3500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"МКА БЕЗ ЗАПИВА","price":"2500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"СНОПОЕЗД","price":"9500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"СНОПОЕЗД АБСЕНТА","price":"18500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"СНОПОЕЗД ТЕКИЛОЙ","price":"13500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"С БАЛТИКОЙ 9","price":"4500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"С ПИВО + АБСЕНТ","price":"6500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"С БАЛТИКА 9 + АБСЕНТ","price":"10500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"С 3 РЮМКАМИ В СТАКАНЕ","price":"8500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"С ЗАЛПОМ","price":"2000 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"БИТИКА 9 ЗАЛПОМ","price":"3500 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"100 МЛ ВОДКИ ЗАЛПОМ","price":"15000 ₽","isAccent":false,"accentColor":"#ff4747"},
-      {"name":"КА САМОГОНА","price":"5000 ₽","isAccent":true,"accentColor":"#ff4747"},
-      {"name":"СОК 5 ЛТР","price":"2500 ₽","isAccent":true,"accentColor":"#ff4747"},
-      {"name":"ЛОЖКА СОСУСА","price":"2500 ₽","isAccent":true,"accentColor":"#ff4747"},
-      {"name":"ЛОЖКА ВАССАБИ","price":"2000 ₽","isAccent":true,"accentColor":"#ff4747"},
-      {"name":"ЛОЖКА ГОРЧИЦЫ","price":"2500 ₽","isAccent":true,"accentColor":"#ff4747"}
+      {"name":"Приветствие на стриме","price":"100 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Смена ника ","price":"300 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"Игра с подписчиком","price":"500 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"Заказ музыки (1 трек)","price":"200 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Отжимания от пола (x10)","price":"150 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Приседания (x20)","price":"250 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Съесть лимон","price":"400 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"Рофл над стримером","price":"1000 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"Просмотр видео","price":"800 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Рандомный челлендж","price":"600 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"+1 час к стриму","price":"2000 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"Снять маску","price":"5000 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Выгнать гостя","price":"700 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"Показать лицо на 1 минуту","price":"1500 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"Выключить игру и поговорить с чатом","price":"900 ₽","isAccent":false,"accentColor":"#ff4747"}
     ],
     qrs: [
-      { image: "", title: "ДОНАТ ПО QR", subtext: "Поддержи стрим" }
+      { image: "", title: "ДОНАТ НА СТРИМ", subtext: "Поддержи стримера" }
     ]
   };
 
