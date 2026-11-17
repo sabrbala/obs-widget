@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Инструкция — OBS Price Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0b0e14;
+    color: #e6edf5;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===== TOP BAR ===== */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,14,20,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  .topbar-logo {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: #ffd200;
+    letter-spacing: 0.5px;
+  }
+  .topbar-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #e6edf5;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s;
+  }
+  .topbar-back:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* ===== LAYOUT ===== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    text-align: center;
+    padding: 20px 0 50px;
+    position: relative;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -50px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(circle, rgba(255,210,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(43,123,255,0.15);
+    border: 1px solid rgba(43,123,255,0.4);
+    color: #7eb1ff;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, #ffd200 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 17px;
+    color: #8a9bb0;
+    max-width: 600px;
+    margin: 0 auto 30px;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 30px;
+    background: #ffd200;
+    color: #111;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 20px rgba(255,210,0,0.35);
+    transition: 0.2s;
+  }
+  .hero-cta:hover {
+    background: #e6bd00;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(255,210,0,0.5);
+  }
+
+  /* ===== QUICK START CARDS ===== */
+  .section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 50px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title::before {
+    content: "";
+    width: 4px;
+    height: 28px;
+    background: #ffd200;
+    border-radius: 2px;
+  }
+  .section-sub {
+    color: #8a9bb0;
+    font-size: 14px;
+    margin: -12px 0 24px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .quick-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px;
+    position: relative;
+    transition: 0.25s;
+  }
+  .quick-card:hover {
+    border-color: rgba(255,210,0,0.35);
+    transform: translateY(-3px);
+  }
+  .quick-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: #ffd200;
+    color: #111;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    border-radius: 50%;
+    margin-bottom: 12px;
+  }
+  .quick-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .quick-card p {
+    font-size: 12px;
+    color: #8a9bb0;
+    line-height: 1.4;
+  }
+
+  /* ===== STEP ===== */
+  .step {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, #ffd200, #ff8a00);
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    background: #ffd200;
+    color: #111;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(255,210,0,0.3);
+  }
+  .step-header h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .step-body {
+    color: #b0c0d0;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .step-body p + p { margin-top: 10px; }
+  .step-body code {
+    background: rgba(255,210,0,0.12);
+    color: #ffd200;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+  }
+  .step-body ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 12px 0;
+  }
+  .step-body li {
+    padding-left: 26px;
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .step-body li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #2ecc71;
+    font-weight: 800;
+  }
+  .warn {
+    background: rgba(231,76,60,0.1);
+    border: 1px solid rgba(231,76,60,0.3);
+    border-left: 4px solid #e74c3c;
+    padding: 14px 18px;
+    border-radius: 10px;
+    color: #ffb3b3;
+    font-size: 14px;
+    margin-top: 14px;
+  }
+  .warn b { color: #ff4747; }
+
+  /* ===== SCREENSHOTS ===== */
+  .shot {
+    margin: 20px 0 0;
+  }
+  .shot-frame {
+    position: relative;
+    background: #0e1520;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .shot-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .shot-placeholder {
+    display: none;
+    padding: 60px 24px;
+    text-align: center;
+    color: #6a7a8a;
+    font-size: 14px;
+  }
+  .shot-frame.empty .shot-placeholder { display: block; }
+  .shot-placeholder code {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #4a5568;
+    background: rgba(255,255,255,0.04);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .shot figcaption {
+    text-align: center;
+    color: #6a7a8a;
+    font-size: 13px;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  /* ===== FEATURES ===== */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .feature {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px;
+    transition: 0.2s;
+  }
+  .feature:hover {
+    border-color: rgba(43,123,255,0.4);
+    transform: translateY(-2px);
+  }
+  .feature-icon {
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+  .feature h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .feature p {
+    font-size: 13px;
+    color: #8a9bb0;
+    line-height: 1.5;
+  }
+
+  /* ===== FAQ ===== */
+  .faq details {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    transition: 0.2s;
+  }
+  .faq details[open] {
+    border-color: rgba(255,210,0,0.35);
+    background: rgba(255,210,0,0.04);
+  }
+  .faq summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: #e6edf5;
+    font-size: 15px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: "+";
+    color: #ffd200;
+    font-size: 22px;
+    font-weight: 400;
+    transition: transform 0.2s;
+  }
+  .faq details[open] summary::after {
+    content: "−";
+  }
+  .faq details p {
+    margin-top: 12px;
+    color: #b0c0d0;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #6a7a8a;
+    font-size: 13px;
+  }
+  .footer a {
+    color: #ffd200;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 12px 15px; }
+    .topbar-logo { font-size: 14px; }
+    .container { padding: 25px 15px 60px; }
+    .step { padding: 20px; }
+    .step-header h3 { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="topbar">
+  <div class="topbar-logo">🎯 OBS Price Widget</div>
+  <a href="index.html" class="topbar-back">← К настройкам</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">📖 Инструкция</div>
+    <h1>Прайс в OBS за 2 минуты</h1>
+    <p>Настрой виджет в браузере, скачай файл, добавь в OBS — и красивый список услуг с автопрокруткой готов.</p>
+    <a href="index.html" class="hero-cta">🚀 Открыть настройки</a>
+  </div>
+
+  <!-- ===== QUICK START ===== -->
+  <h2 class="section-title">Быстрый старт</h2>
+  <p class="section-sub">Вся суть — в четырёх шагах. Детали ниже.</p>
+  <div class="quick-grid">
+    <div class="quick-card">
+      <div class="quick-num">1</div>
+      <h3>Настрой</h3>
+      <p>Открой панель настроек и настрой услуги, шрифт, цвета, QR.</p>
+    </div>
+    <div class="quick-card">
+      <div class="quick-num">2</div>
+      <h3>Скачай</h3>
+      <p>Нажми жёлтую кнопку — получишь <code>widget.html</code>.</p>
+    </div>
+    <div class="quick-card">
+      <div class="quick-num">3</div>
+      <h3>Добавь в OBS</h3>
+      <p>Источник → Браузер → Локальный файл → выбери файл.</p>
+    </div>
+    <div class="quick-card">
+      <div class="quick-num">4</div>
+      <h3>Готово 🎉</h3>
+      <p>Виджет крутит страницы, потом скрывается и снова появляется.</p>
+    </div>
+  </div>
+
+  <!-- ===== STEP 1 ===== -->
+  <h2 class="section-title">Пошагово</h2>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <h3>Открой настройки</h3>
+    </div>
+    <div class="step-body">
+      <p>Открой страницу настроек в любом современном браузере (Chrome, Edge, Firefox). Слева — все настройки, справа — живое превью, которое обновляется мгновенно.</p>
+      <div class="warn">
+        ⚠️ <b>Не добавляй файл настроек в OBS напрямую</b> — это только редактор. В OBS пойдёт <code>widget.html</code>, скачанный на следующем шаге.
+      </div>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/01-settings.png" alt="Панель настроек"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: панель настроек<br><code>screenshots/01-settings.png</code></div>
+        </div>
+        <figcaption>Панель настроек с живым превью справа</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2 ===== -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <h3>Настрой всё под себя</h3>
+    </div>
+    <div class="step-body">
+      <p>Все настройки сохраняются в браузере автоматически — можешь закрыть и вернуться позже, всё будет на месте.</p>
+      <ul>
+        <li><b>Услуги</b> — добавляй, удаляй и перетаскивай за <code>≡</code></li>
+        <li><b>Стиль цены</b> — в одну строку или плашкой справа</li>
+        <li><b>Цвета</b> — общий акцент, свой цвет у отдельных услуг</li>
+        <li><b>Тайминги</b> — сколько секунд на страницу и когда скрывать</li>
+        <li><b>QR-коды</b> — до 2 штук, картинкой до 1 МБ</li>
+      </ul>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/07-services.png" alt="Список услуг"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: список услуг<br><code>screenshots/07-services.png</code></div>
+        </div>
+        <figcaption>Перетаскивай услуги за ручку ≡, отмечай акцентные галочкой</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/06-qr.png" alt="QR-коды"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: блок QR<br><code>screenshots/06-qr.png</code></div>
+        </div>
+        <figcaption>Загрузи картинку QR — она появится на виджете</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3 ===== -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <h3>Скачай виджет</h3>
+    </div>
+    <div class="step-body">
+      <p>Вверху страницы нажми жёлтую кнопку <b>«💾 СКАЧАТЬ ВИДЖЕТ ДЛЯ OBS»</b>. Откроется диалог сохранения — сохрани файл как <code>widget.html</code> в любую папку.</p>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/02-download.png" alt="Кнопка скачивания"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: кнопка скачивания<br><code>screenshots/02-download.png</code></div>
+        </div>
+        <figcaption>Жёлтая кнопка — скачивание готового виджета</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4 ===== -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <h3>Добавь в OBS</h3>
+    </div>
+    <div class="step-body">
+      <p>В OBS открой панель <b>«Источники»</b> и нажми <b>«+»</b> → выбери <b>«Браузер»</b> → назови как хочешь.</p>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/03-obs-source.png" alt="OBS: источники"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: OBS, кнопка «+» в источниках<br><code>screenshots/03-obs-source.png</code></div>
+        </div>
+        <figcaption>Источники → «+» → Браузер</figcaption>
+      </figure>
+      <p>В открывшемся окне:</p>
+      <ul>
+        <li>Поставь галочку <b>«Локальный файл»</b></li>
+        <li>Нажми <b>«Обзор…»</b> и выбери свой <code>widget.html</code></li>
+        <li>Ширина: <code>400</code>, высота: <code>600</code> (подгони под себя)</li>
+        <li>Галочка <b>«Обновить, когда сцена активна»</b> — по желанию (экономит CPU в фоне)</li>
+        <li>Нажми <b>OK</b></li>
+      </ul>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/04-obs-browser.png" alt="OBS: свойства браузера"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: свойства браузера в OBS<br><code>screenshots/04-obs-browser.png</code></div>
+        </div>
+        <figcaption>Галочка «Локальный файл» + путь к widget.html</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ===== STEP 5 ===== -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <h3>Наслаждайся результатом</h3>
+    </div>
+    <div class="step-body">
+      <p>Виджет появится на сцене, начнёт крутить страницы и через заданное время скроется. Если включено автоскрытие — вернётся обратно через паузу. Всё готово! 🎉</p>
+      <figure class="shot">
+        <div class="shot-frame">
+          <img src="screenshots/05-result.png" alt="Готовый виджет в OBS"
+               onerror="this.style.display='none'; this.parentElement.classList.add('empty');">
+          <div class="shot-placeholder">📸 Скриншот: виджет в OBS<br><code>screenshots/05-result.png</code></div>
+        </div>
+        <figcaption>Готовый виджет на сцене OBS</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ===== FEATURES ===== -->
+  <h2 class="section-title">Возможности</h2>
+  <p class="section-sub">Что умеет виджет из коробки.</p>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🎨</div>
+      <h4>Гибкая настройка</h4>
+      <p>8 шрифтов, цвет текста, акцента и цены. Два стиля прайса на выбор.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔄</div>
+      <h4>Автопрокрутка</h4>
+      <p>Листает страницы с настраиваемым интервалом. Показывает актуальный прайс без ручного листания.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⏱️</div>
+      <h4>Автоскрытие</h4>
+      <p>Виджет появляется, прокручивает прайс и скрывается. Возвращается сам — не нужно ничего кликать.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📱</div>
+      <h4>QR-коды</h4>
+      <p>До двух QR — для донатов, соцсетей или ссылок. Горизонтально или вертикально.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">💾</div>
+      <h4>Сохранение</h4>
+      <p>Настройки хранятся в браузере. Закрой вкладку — вернёшься, всё на месте.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <h4>Приватность</h4>
+      <p>Всё работает локально, без серверов. Никаких аккаунтов, никаких данных наружу.</p>
+    </div>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <h2 class="section-title">Частые вопросы</h2>
+  <div class="faq">
+    <details>
+      <summary>Виджет не появился в OBS — что проверить?</summary>
+      <p>Убедись, что в свойствах источника стоит галочка <b>«Локальный файл»</b> и выбран именно <code>widget.html</code>, а не файл настроек. Также проверь, что путь к файлу не содержит кириллицы — иногда OBS спотыкается. Попробуй положить файл в <code>C:\widget\widget.html</code>.</p>
+    </details>
+    <details>
+      <summary>Почему виджет не исчезает?</summary>
+      <p>Скорее всего в настройках выключено <b>«Автоскрытие»</b>. Включи галочку — и виджет будет скрываться через заданное время и снова появляться.</p>
+    </details>
+    <details>
+      <summary>Как долго показывается виджет и когда скрывается?</summary>
+      <p>Всё зависит от двух параметров: <b>«Показ страницы (сек)»</b> и <b>«Время скрытия (сек)»</b>. Виджет тратит на прокрутку всего прайса = <code>количество страниц × время показа</code>. Только после этого он скрывается. Если «Время скрытия» меньше — оно автоматически увеличится до безопасного минимума.</p>
+    </details>
+    <details>
+      <summary>Можно ли использовать несколько виджетов одновременно?</summary>
+      <p>Да. Просто скачай файл под разными именами (например <code>donate-widget.html</code> и <code>games-widget.html</code>) и добавь как два независимых источника в OBS.</p>
+    </details>
+    <details>
+      <summary>Настройки сбросились. Почему?</summary>
+      <p>Настройки хранятся в <code>localStorage</code> браузера. Сбросить их можно кнопкой «🗑️ Сброс» или при очистке данных сайта в браузере. Регулярно скачивай финальный <code>widget.html</code> — он содержит все настройки внутри себя и от браузера не зависит.</p>
+    </details>
+    <details>
+      <summary>Как изменить готовый виджет?</summary>
+      <p>Открой страницу настроек → всё поправишь → снова нажми «Скачать». Новый файл заменит старый — OBS подхватит изменения автоматически, перезапускать ничего не надо.</p>
+    </details>
+  </div>
+
+  <!-- ===== FINAL CTA ===== -->
+  <div style="text-align:center; margin-top:50px;">
+    <a href="index.html" class="hero-cta">🎯 Перейти к настройкам</a>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>Сделано с ❤️ для стримеров. <a href="index.html">Настройки</a> · <a href="https://github.com" target="_blank" rel="noopener">GitHub</a></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Настройка виджета OBS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto+Mono:wght@400;700&family=Roboto:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+
+<style>
+  /* ================= СТИЛИ ПАНЕЛИ ================= */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0b0e14; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+
+  .alert-box {
+    background: rgba(231, 76, 60, 0.15);
+    border: 2px solid #e74c3c;
+    padding: 15px 20px; border-radius: 12px; margin-bottom: 20px;
+    text-align: center; box-shadow: 0 0 20px rgba(231, 76, 60, 0.2);
+  }
+  .alert-box h2 { color: #ff4747; margin-bottom: 8px; font-size: 20px; }
+  .alert-box p { color: #ffb3b3; font-size: 14px; }
+
+  .save-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; align-items: center; }
+  .save-name-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: #1a222c; border: 1px solid #2a3340;
+    border-radius: 12px; padding: 0 15px; flex: 0 0 240px; min-height: 56px;
+  }
+  .save-name-wrap span { color: #b0c0d0; font-size: 13px; white-space: nowrap; }
+  .save-name-wrap input {
+    flex: 1; background: transparent; border: none; color: #fff;
+    font-size: 15px; padding: 8px 0; outline: none; min-width: 0;
+  }
+  
+  .btn-top-save {
+    flex: 1; min-width: 260px; padding: 18px;
+    background: #ffd200; color: #111; border: none; border-radius: 12px;
+    font-size: 18px; font-weight: 800; cursor: pointer; transition: 0.2s;
+    box-shadow: 0 4px 15px rgba(255, 210, 0, 0.4);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .btn-top-save:hover { background: #e6bd00; transform: translateY(-2px); }
+
+  .btn-reset {
+    padding: 18px 25px; background: transparent; color: #e74c3c;
+    border: 2px solid #e74c3c; border-radius: 12px;
+    font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s;
+  }
+  .btn-reset:hover { background: rgba(231, 76, 60, 0.1); }
+
+  .layout { display: flex; gap: 30px; align-items: flex-start; }
+  .col-left { flex: 1; max-width: 600px; }
+  .col-right { flex: 1; position: sticky; top: 20px; display: flex; justify-content: center; }
+
+  .preview-wrapper {
+    background: #1a1e26; border: 1px solid #2a3340; padding: 20px;
+    border-radius: 16px; position: relative;
+    min-height: 400px; width: 100%;
+    display: flex; flex-direction: column; align-items: stretch;
+  }
+  .preview-wrapper::before {
+    content: "👁 ПРЕВЬЮ ВИДЖЕТА";
+    position: absolute; top: -12px; left: 20px;
+    background: #2b7bff; color: #fff; font-size: 11px; font-weight: bold;
+    padding: 4px 10px; border-radius: 10px;
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  /* Внутренний контейнер превью: обрезает только виджет, не бейдж */
+  #previewContainer {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    justify-content: safe center;
+    align-items: flex-start;
+    overflow: hidden;
+  }
+
+  .settings-group { background: rgba(255,255,255,0.04); border-radius: 16px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.06); }
+  .settings-group h3 { 
+    font-size: 16px; color: #ffd200; margin-bottom: 15px; 
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .item-count-badge { color: #8a9bb0; font-size: 13px; font-weight: 500; }
+
+  .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; align-items: flex-start; }
+  .form-row label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #b0c0d0; flex: 1 0 130px; }
+  .form-row input[type="text"], .form-row input[type="number"], .form-row select { 
+    padding: 8px 12px; border-radius: 8px; border: 1px solid #2a3340; 
+    background: #1a222c; color: #fff; font-size: 14px; width: 100%; 
+  }
+  .form-row input[type="color"] { 
+    padding: 2px; height: 38px; width: 100%; cursor: pointer; 
+    border-radius: 8px; border: 1px solid #2a3340; background: #1a222c; 
+  }
+  .form-row input:focus, .form-row select:focus { outline: none; border-color: #ffd200; }
+  .hint { font-size: 11px; color: #6a7a8a; margin-top: 3px; line-height: 1.2; }
+
+  /* Range slider */
+  .form-row input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 8px; padding: 0;
+    background: #2a3340; border-radius: 4px; outline: none; cursor: pointer;
+    border: none; margin-top: 10px;
+  }
+  .form-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px;
+    background: #ffd200; border-radius: 50%; cursor: pointer;
+    box-shadow: 0 0 6px rgba(255,210,0,0.6);
+  }
+  .form-row input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; background: #ffd200;
+    border-radius: 50%; border: none; cursor: pointer;
+  }
+
+  /* Чекбокс */
+  .checkbox-row {
+    display: flex !important; flex-direction: row !important; align-items: center !important;
+    gap: 10px !important; flex: 1 0 100% !important; cursor: pointer;
+    padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #2a3340;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 18px !important; height: 18px !important; accent-color: #ffd200; cursor: pointer; flex-shrink: 0; margin: 0;
+  }
+  .checkbox-row span { color: #d0dae6; font-size: 13px; line-height: 1.4; }
+
+  .price-style-group {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px; background: rgba(0,0,0,0.2); padding: 15px;
+    border-radius: 8px; border: 1px solid #2a3340; margin-bottom: 15px;
+  }
+  .price-style-group label { flex: none; }
+
+  .item-row { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid #2a3340; margin-bottom: 8px; cursor: grab; }
+  .item-row input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; padding: 4px; border-bottom: 1px solid transparent; }
+  .item-row input[type="text"]:focus { outline: none; border-bottom: 1px solid #ffd200; }
+  .item-index { color: #8a9bb0; font-size: 13px; font-weight: 700; min-width: 22px; text-align: right; user-select: none; }
+  .drag-handle { color: #6a7a8a; font-size: 18px; user-select: none; }
+  .item-row label { display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap; cursor: pointer; flex: none; }
+  
+  /* Мини-палитра */
+  .mini-color-picker {
+    width: 24px; height: 24px; padding: 0; border: none; border-radius: 4px; cursor: pointer;
+    background: transparent; transition: opacity 0.2s;
+  }
+  .mini-color-picker:disabled { opacity: 0.2; cursor: not-allowed; }
+
+  .remove-btn { background: #e74c3c; border: none; color: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; flex: none; }
+  .add-btn { padding: 10px 20px; border-radius: 8px; border: none; background: #2ecc71; color: #fff; cursor: pointer; font-weight: 600; margin-top: 5px; width: 100%; }
+  .add-btn:disabled { background: #4a5568; cursor: not-allowed; }
+
+  /* ================= СТИЛИ ПРЕВЬЮ ================= */
+  .obs-widget-wrapper {
+    display: flex; flex-direction: column; gap: 15px;
+    opacity: var(--widget-opacity, 1);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    transform: translateY(0);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .obs-price-card {
+    background: rgba(15,15,20,0.85); 
+    border: 2px solid rgba(255,255,255,0.15); 
+    border-radius: 16px; padding: 20px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+  }
+  
+  .obs-price-list { 
+    position: relative;
+    font-weight: 600; 
+    width: 100%;
+    transition: height 0.45s ease;
+  }
+  .obs-page {
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+  }
+  .obs-page.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ФИКС ДЛЯ ПРЕВЬЮ (чтобы страницы не накладывались) */
+  .preview-wrapper .obs-price-list {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .preview-wrapper .obs-page {
+    position: relative !important;
+    display: none !important;
+    top: auto !important;
+    left: auto !important;
+  }
+  .preview-wrapper .obs-page.active {
+    display: flex !important;
+    opacity: 1 !important;
+  }
+  
+  .obs-price-item { 
+    padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); 
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    line-height: 1.2;
+  }
+  .obs-price-item:last-child { border-bottom: none; }
+  .obs-text-accent { color: var(--accent-color, #ff4747) !important; }
+  
+  .obs-price-badge {
+    background: var(--price-bg);
+    color: var(--price-color);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.95em;
+    font-weight: 700;
+    white-space: nowrap;
+    display: inline-block;
+    -webkit-text-stroke: var(--price-stroke-width, 0px) var(--price-stroke-color, transparent);
+    paint-order: stroke fill;
+  }
+  
+  .obs-qr-container { display: grid; width: 100%; }
+  .obs-qr-block { 
+    grid-area: 1 / 1;
+    background: rgba(15,15,20,0.85); 
+    border: 2px solid rgba(255,255,255,0.15); 
+    border-radius: 16px; padding: 12px 20px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    display: flex; align-items: center; gap: 15px; 
+    opacity: 0; transition: opacity 0.45s ease; pointer-events: none;
+    box-sizing: border-box;
+  }
+  .obs-qr-block.active { opacity: 1; pointer-events: auto; }
+  .obs-qr-block img { width: 90px; height: 90px; border-radius: 8px; background: #fff; padding: 4px; flex-shrink: 0; object-fit: contain; }
+  .obs-qr-text { font-weight: 700; line-height: 1.3; }
+  .obs-qr-text span { display: block; font-weight: 400; opacity: 0.7; margin-top: 4px; }
+
+  .obs-qr-block.vertical {
+    flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    padding: 16px 20px; gap: 10px; width: max-content; max-width: 100%; justify-self: center;
+  }
+
+/* ================= HELP BANNER ================= */
+.help-banner {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, rgba(43,123,255,0.15), rgba(30,94,214,0.08));
+  border: 1px solid rgba(43,123,255,0.35);
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.help-banner-text {
+  color: #c8d9ff;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.help-banner-text b { color: #fff; }
+.btn-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: #2b7bff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(43,123,255,0.3);
+}
+.btn-help:hover {
+  background: #1e5ed6;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(43,123,255,0.45);
+}
+
+</style>
+</head>
+<body>
+
+<div class="alert-box">
+  <h2>⚠️ ВНИМАНИЕ! ЭТО ФАЙЛ НАСТРОЕК ⚠️</h2>
+  <p>НЕ добавляй этот файл в OBS! Настрой всё, нажми желтую кнопку, и в OBS добавь скачанный файл <b>widget.html</b></p>
+</div>
+
+<div class="help-banner">
+  <div class="help-banner-text">
+    📖 <b>Первый раз здесь?</b> Прочитай инструкцию — 30 секунд и виджет работает в OBS.
+  </div>
+  <a href="instruction.html" target="_blank" rel="noopener" class="btn-help">
+    Открыть инструкцию →
+  </a>
+</div>
+
+
+<div class="save-bar">
+  <div class="save-name-wrap">
+    <span>💾 Имя файла:</span>
+    <input type="text" id="saveFilename" value="widget.html">
+  </div>
+  <button class="btn-top-save" id="saveBtn">💾 СКАЧАТЬ ВИДЖЕТ ДЛЯ OBS</button>
+  <button class="btn-reset" id="resetBtn" title="Сбросить все настройки к изначальным">🗑️ Сброс</button>
+</div>
+
+<div class="layout">
+  <div class="col-left">
+    
+    <!-- РАЗМЕРЫ И ШРИФТ -->
+    <div class="settings-group">
+      <h3>📏 Размеры, Шрифт, Цвет и Прозрачность</h3>
+      <div class="form-row">
+        <label>Ширина виджета (px)
+          <input type="number" id="widgetWidth" min="200" max="800" value="380">
+        </label>
+        <label>Размер шрифта (px)
+          <input type="number" id="widgetFontSize" min="10" max="30" value="16">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Шрифт
+          <select id="widgetFontFamily">
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Roboto', sans-serif">Roboto</option>
+            <option value="'Oswald', sans-serif">Oswald (узкий)</option>
+            <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+            <option value="'Russo One', sans-serif">Russo One</option>
+            <option value="'Roboto Mono', monospace">Roboto Mono</option>
+            <option value="'Segoe UI', sans-serif" selected>Segoe UI (по умолчанию)</option>
+          </select>
+        </label>
+        <label>Цвет текста
+          <input type="color" id="widgetTextColor" value="#ffffff">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Глобальный цвет акцента
+          <input type="color" id="accentColor" value="#ff4747">
+          <span class="hint">Применяется ко всем, у кого стоит галочка "Акцент"</span>
+        </label>
+        <label>Непрозрачность виджета (%)
+          <input type="range" id="widgetOpacity" min="10" max="100" value="100">
+          <span class="hint"><span id="opacityVal">100</span>% видимости</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ТАЙМИНГИ -->
+    <div class="settings-group">
+      <h3>⏱️ Тайминги и отображение</h3>
+      <div class="form-row" style="align-items: flex-start;">
+        <label>Услуг на 1 странице
+          <input type="number" id="itemsPerPage" min="1" max="30" value="14">
+        </label>
+        <label>Показ страницы (сек)
+          <input type="number" id="timePerPage" min="2" max="60" value="6">
+        </label>
+        <label id="hideTimeWrap">Время скрытия (сек)
+          <input type="number" id="hideTime" min="1" max="300" value="15">
+        </label>
+      </div>
+      
+      <div class="form-row" style="margin-top: 5px; margin-bottom: 0;">
+        <label class="checkbox-row">
+          <input type="checkbox" id="autoHide" checked>
+          <span>🔁 Автоскрытие виджета (если выключено — виджет не исчезает, а бесконечно листает страницы)</span>
+        </label>
+      </div>
+      <div class="hint" style="margin-top: 8px; padding-left: 2px;">
+        * Время скрытия не может быть меньше, чем время показа всего прайса.
+      </div>
+    </div>
+
+    <!-- УСЛУГИ -->
+    <div class="settings-group">
+      <h3>
+        <span>📋 Список услуг ( тащи за ≡ )</span>
+        <span class="item-count-badge" id="servicesCount">Всего: 0</span>
+      </h3>
+      <div class="form-row" style="margin-bottom: 10px;">
+        <label>Стиль отображения прайса
+          <select id="priceMode">
+            <option value="combined">Текст и цена вместе (в одну строку)</option>
+            <option value="split">Раздельно (Название слева, Цена плашкой справа)</option>
+          </select>
+        </label>
+      </div>
+      
+      <div class="price-style-group" id="priceStyleRow" style="display: none;">
+        <label>Цвет текста цены
+          <input type="color" id="priceTextColor" value="#ffffff">
+        </label>
+        <label>Фон плашки
+          <input type="color" id="priceBgColor" value="#2b203e">
+        </label>
+        <label>Цвет обводки
+          <input type="color" id="priceStrokeColor" value="#000000">
+        </label>
+        <label>Толщина обводки
+          <input type="number" id="priceStrokeWidth" min="0" max="5" step="0.5" value="0">
+        </label>
+      </div>
+      
+      <div id="itemsContainer"></div>
+      <button class="add-btn" id="addItemBtn">➕ Добавить услугу</button>
+    </div>
+
+    <!-- QR-КОДЫ -->
+    <div class="settings-group">
+      <h3>
+        <span>📱 QR-коды (макс. 2)</span>
+        <span class="item-count-badge" id="qrsCount">Всего: 0</span>
+      </h3>
+      <div class="form-row" style="margin-bottom: 15px;">
+        <label>Расположение QR и текста
+          <select id="qrLayout">
+            <option value="horizontal">QR слева — текст справа</option>
+            <option value="vertical">QR сверху — текст снизу (по центру)</option>
+          </select>
+        </label>
+      </div>
+      <div id="qrsContainer"></div>
+      <button class="add-btn" id="addQrBtn">➕ Добавить QR-код</button>
+    </div>
+  </div>
+
+  <!-- ПРЕВЬЮ -->
+  <div class="col-right">
+    <div class="preview-wrapper">
+      <div id="previewContainer"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ДЕФОЛТНЫЙ КОНФИГ (19 позиций)
+  const defaultConfig = {
+    version: 7,
+    widgetWidth: 380,
+    widgetFontSize: 16,
+    widgetFontFamily: "'Segoe UI', sans-serif",
+    widgetTextColor: "#ffffff",
+    widgetOpacity: 100,
+    accentColor: "#ff4747",
+    priceMode: "combined",
+    priceTextColor: "#ffffff",
+    priceBgColor: "#2b203e",
+    priceStrokeColor: "#000000",
+    priceStrokeWidth: 0,
+    itemsPerPage: 14,
+    timePerPage: 6,
+    hideTime: 15,
+    autoHide: true,
+    qrLayout: "horizontal",
+    services: [
+      {"name":"МКА","price":"1600 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"МКА ТЕКИЛЫ","price":"2500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"МКА АБСЕНТА","price":"3500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"МКА БЕЗ ЗАПИВА","price":"2500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"СНОПОЕЗД","price":"9500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"СНОПОЕЗД АБСЕНТА","price":"18500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"СНОПОЕЗД ТЕКИЛОЙ","price":"13500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"С БАЛТИКОЙ 9","price":"4500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"С ПИВО + АБСЕНТ","price":"6500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"С БАЛТИКА 9 + АБСЕНТ","price":"10500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"С 3 РЮМКАМИ В СТАКАНЕ","price":"8500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"С ЗАЛПОМ","price":"2000 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"БИТИКА 9 ЗАЛПОМ","price":"3500 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"100 МЛ ВОДКИ ЗАЛПОМ","price":"15000 ₽","isAccent":false,"accentColor":"#ff4747"},
+      {"name":"КА САМОГОНА","price":"5000 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"СОК 5 ЛТР","price":"2500 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"ЛОЖКА СОСУСА","price":"2500 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"ЛОЖКА ВАССАБИ","price":"2000 ₽","isAccent":true,"accentColor":"#ff4747"},
+      {"name":"ЛОЖКА ГОРЧИЦЫ","price":"2500 ₽","isAccent":true,"accentColor":"#ff4747"}
+    ],
+    qrs: [
+      { image: "", title: "ДОНАТ ПО QR", subtext: "Поддержи стрим" }
+    ]
+  };
+
+  const MAX_QR = 2;
+  const MAX_SERVICES = 500;
+  const MAX_QR_FILE_SIZE = 1024 * 1024;
+
+  const FONT_ALLOWLIST = new Set([
+    "'Montserrat', sans-serif", "'Inter', sans-serif", "'Roboto', sans-serif",
+    "'Oswald', sans-serif", "'Bebas Neue', sans-serif", "'Russo One', sans-serif",
+    "'Roboto Mono', monospace", "'Segoe UI', sans-serif"
+  ]);
+
+  // === Нормализация / валидация ===
+  function clampNumber(value, fallback, min, max, integer = true) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return fallback;
+    const bounded = Math.min(max, Math.max(min, number));
+    return integer ? Math.round(bounded) : bounded;
+  }
+
+  function validColor(value, fallback) {
+    return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+  }
+
+  function validQrImage(value) {
+    return typeof value === 'string' &&
+      value.length <= 2 * 1024 * 1024 &&
+      /^data:image\/(png|jpeg|jpg|webp|gif);base64,[a-z0-9+/]+=*$/i.test(value)
+      ? value : '';
+  }
+
+  function normalizeConfig(raw) {
+    const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    const cfg = JSON.parse(JSON.stringify(defaultConfig));
+
+    cfg.widgetWidth = clampNumber(source.widgetWidth, defaultConfig.widgetWidth, 200, 800);
+    cfg.widgetFontSize = clampNumber(source.widgetFontSize, defaultConfig.widgetFontSize, 10, 30);
+    cfg.widgetFontFamily = FONT_ALLOWLIST.has(source.widgetFontFamily)
+      ? source.widgetFontFamily : defaultConfig.widgetFontFamily;
+    cfg.widgetTextColor = validColor(source.widgetTextColor, defaultConfig.widgetTextColor);
+    cfg.widgetOpacity = clampNumber(source.widgetOpacity, defaultConfig.widgetOpacity, 10, 100);
+    cfg.accentColor = validColor(source.accentColor, defaultConfig.accentColor);
+    cfg.priceMode = source.priceMode === 'split' ? 'split' : 'combined';
+    cfg.priceTextColor = validColor(source.priceTextColor, defaultConfig.priceTextColor);
+    cfg.priceBgColor = validColor(source.priceBgColor, defaultConfig.priceBgColor);
+    cfg.priceStrokeColor = validColor(source.priceStrokeColor, defaultConfig.priceStrokeColor);
+    cfg.priceStrokeWidth = clampNumber(source.priceStrokeWidth, defaultConfig.priceStrokeWidth, 0, 5, false);
+    cfg.itemsPerPage = clampNumber(source.itemsPerPage, defaultConfig.itemsPerPage, 1, 30);
+    cfg.timePerPage = clampNumber(source.timePerPage, defaultConfig.timePerPage, 2, 60);
+    cfg.hideTime = clampNumber(source.hideTime, defaultConfig.hideTime, 1, 300);
+    cfg.autoHide = typeof source.autoHide === 'boolean' ? source.autoHide : defaultConfig.autoHide;
+    cfg.qrLayout = source.qrLayout === 'vertical' ? 'vertical' : 'horizontal';
+
+    cfg.services = Array.isArray(source.services)
+      ? source.services.slice(0, MAX_SERVICES).map(item => {
+          const svc = item && typeof item === 'object' ? item : {};
+          return {
+            name: String(svc.name ?? '').slice(0, 200),
+            price: String(svc.price ?? '').slice(0, 80),
+            isAccent: Boolean(svc.isAccent),
+            accentColor: validColor(svc.accentColor, cfg.accentColor)
+          };
+        })
+      : JSON.parse(JSON.stringify(defaultConfig.services));
+
+    cfg.qrs = Array.isArray(source.qrs)
+      ? source.qrs.slice(0, MAX_QR).map(item => {
+          const qr = item && typeof item === 'object' ? item : {};
+          return {
+            image: validQrImage(qr.image),
+            title: String(qr.title ?? '').slice(0, 100),
+            subtext: String(qr.subtext ?? '').slice(0, 160)
+          };
+        })
+      : JSON.parse(JSON.stringify(defaultConfig.qrs));
+
+    return cfg;
+  }
+
+  // === Загрузка конфига с миграцией ===
+  let config = JSON.parse(JSON.stringify(defaultConfig));
+  try {
+    const saved = localStorage.getItem('obsWidgetConfig');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        const savedVersion = typeof parsed.version === 'number' ? parsed.version : 0;
+        // Мигрируем: любой конфиг версии <= текущей (включая без версии)
+        if (savedVersion <= defaultConfig.version) {
+          config = normalizeConfig(parsed);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Не удалось загрузить настройки OBS:', e);
+    config = JSON.parse(JSON.stringify(defaultConfig));
+  }
+
+  // === Дебаунсенное сохранение в localStorage ===
+  let storageWarningShown = false;
+  let persistTimer = null;
+  function persistConfig() {
+    if (persistTimer) clearTimeout(persistTimer);
+    persistTimer = setTimeout(() => {
+      try {
+        localStorage.setItem('obsWidgetConfig', JSON.stringify(config));
+        storageWarningShown = false;
+      } catch (e) {
+        console.warn('Не удалось сохранить настройки в LocalStorage:', e);
+        if (!storageWarningShown) {
+          storageWarningShown = true;
+          alert('Не удалось сохранить настройки в браузере. Возможно, переполнено хранилище. Уменьши размер QR-изображений и скачай виджет.');
+        }
+      }
+    }, 250);
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // === Сборка HTML виджета ===
+  function buildWidgetHTML(cfg) {
+    let pages = [];
+    const itemsPer = Math.max(1, cfg.itemsPerPage);
+    for (let i = 0; i < cfg.services.length; i += itemsPer) {
+      pages.push(cfg.services.slice(i, i + itemsPer));
+    }
+    if (pages.length === 0) pages.push([]);
+
+    let listHTML = '';
+    pages.forEach((page, idx) => {
+      const activeCls = idx === 0 ? 'active' : '';
+      listHTML += `<div class="obs-page ${activeCls}" data-page="${idx}">`;
+      page.forEach((item) => {
+        const safeName = item.name || "";
+        const safePrice = item.price || "";
+        let accentStyle = '';
+        if (item.isAccent) {
+           const col = item.accentColor || cfg.accentColor;
+           if (col !== cfg.accentColor) {
+               accentStyle = `style="color: ${col} !important;"`;
+           }
+        }
+
+        let content = '';
+        if (cfg.priceMode === 'split') {
+          content = `
+            <span class="${item.isAccent ? 'obs-text-accent' : ''}" ${accentStyle}>${esc(safeName)}</span>
+            ${safePrice ? `<span class="obs-price-badge">${esc(safePrice)}</span>` : ''}
+          `;
+        } else {
+          const combined = safeName + (safePrice ? ' - ' + safePrice : '');
+          content = `<span class="${item.isAccent ? 'obs-text-accent' : ''}" ${accentStyle}>${esc(combined)}</span>`;
+        }
+        listHTML += `<div class="obs-price-item">${content}</div>`;
+      });
+      listHTML += `</div>`;
+    });
+
+    let qrHTML = '';
+    if (cfg.qrs.length > 0) {
+      const layoutClass = cfg.qrLayout === 'vertical' ? 'vertical' : '';
+      qrHTML += `<div class="obs-qr-container">`;
+      cfg.qrs.forEach((qr, idx) => {
+        const activeClass = idx === 0 ? 'active' : '';
+        qrHTML += `
+          <div class="obs-qr-block ${layoutClass} ${activeClass}" data-qr="${idx}">
+            ${qr.image ? `<img src="${esc(qr.image)}" alt="QR">` : `<div style="width:90px;height:90px;background:#333;border-radius:8px;flex-shrink:0;"></div>`}
+            <div class="obs-qr-text">${esc(qr.title)}<span>${esc(qr.subtext)}</span></div>
+          </div>
+        `;
+      });
+      qrHTML += `</div>`;
+    }
+
+    const widgetStyle = `
+      width: ${cfg.widgetWidth}px; 
+      font-size: ${cfg.widgetFontSize}px; 
+      font-family: ${cfg.widgetFontFamily}; 
+      color: ${cfg.widgetTextColor};
+      --widget-opacity: ${(cfg.widgetOpacity / 100).toFixed(2)};
+      --accent-color: ${cfg.accentColor};
+      --price-bg: ${cfg.priceBgColor};
+      --price-color: ${cfg.priceTextColor};
+      --price-stroke-color: ${cfg.priceStrokeColor};
+      --price-stroke-width: ${cfg.priceStrokeWidth}px;
+    `;
+
+    return `<div class="obs-widget-wrapper" id="obsWidget" style="${widgetStyle}">
+      <div class="obs-price-card">
+        <div class="obs-price-list">${listHTML}</div>
+      </div>
+      ${qrHTML}
+    </div>`;
+  }
+
+  // === Обновление превью через requestAnimationFrame ===
+  let previewPending = false;
+  function updatePreview() {
+    if (previewPending) return;
+    previewPending = true;
+    requestAnimationFrame(() => {
+      previewPending = false;
+      try {
+        document.getElementById('previewContainer').innerHTML = buildWidgetHTML(config);
+      } catch (err) {
+        console.error("Ошибка в предпросмотре:", err);
+        document.getElementById('previewContainer').innerHTML =
+          `<div style="color:red; padding:20px;">Ошибка предпросмотра: ${esc(err.message)}</div>`;
+      }
+      persistConfig();
+    });
+  }
+
+  // === Редактор услуг ===
+  let dragIdx = null;
+  function renderItems() {
+    const c = document.getElementById('itemsContainer');
+    c.innerHTML = '';
+    document.getElementById('servicesCount').textContent = `Всего: ${config.services.length}`;
+    
+    const priceStyleRow = document.getElementById('priceStyleRow');
+    priceStyleRow.style.display = (config.priceMode === 'split') ? 'grid' : 'none';
+
+    config.services.forEach((svc, idx) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.draggable = true;
+      
+      let inputsHTML = '';
+      if (config.priceMode === 'split') {
+        inputsHTML = `
+          <input type="text" class="svc-name" value="${esc(svc.name)}" placeholder="Название" style="flex:2;" spellcheck="false" autocomplete="off">
+          <input type="text" class="svc-price" value="${esc(svc.price || '')}" placeholder="Цена" style="flex:1; text-align: right;" spellcheck="false" autocomplete="off">
+        `;
+      } else {
+        const combined = svc.name + (svc.price ? ' - ' + svc.price : '');
+        inputsHTML = `<input type="text" class="svc-name" value="${esc(combined)}" placeholder="Название и цена (разделитель ' - ')" style="flex:1;" spellcheck="false" autocomplete="off">`;
+      }
+
+      row.innerHTML = `
+        <span class="item-index">${idx + 1}.</span>
+        <span class="drag-handle">≡</span>
+        ${inputsHTML}
+        <label>
+          <input type="checkbox" class="svc-accent" ${svc.isAccent ? 'checked' : ''}> Акцент
+        </label>
+        <input type="color" class="mini-color-picker" value="${svc.accentColor || config.accentColor}" ${svc.isAccent ? '' : 'disabled'} title="Индивидуальный цвет">
+        <button class="remove-btn">✕</button>
+      `;
+
+      if (config.priceMode === 'split') {
+        row.querySelector('.svc-name').addEventListener('input', e => { config.services[idx].name = e.target.value; updatePreview(); });
+        row.querySelector('.svc-price').addEventListener('input', e => { config.services[idx].price = e.target.value; updatePreview(); });
+      } else {
+        row.querySelector('.svc-name').addEventListener('input', e => {
+          const parts = e.target.value.split(' - ');
+          if (parts.length >= 2) {
+            config.services[idx].name = parts[0].trim();
+            config.services[idx].price = parts.slice(1).join(' - ').trim();
+          } else {
+            config.services[idx].name = e.target.value;
+            config.services[idx].price = "";
+          }
+          updatePreview();
+        });
+      }
+
+      const accentCheckbox = row.querySelector('.svc-accent');
+      const colorPicker = row.querySelector('.mini-color-picker');
+
+      accentCheckbox.addEventListener('change', e => {
+        config.services[idx].isAccent = e.target.checked;
+        colorPicker.disabled = !e.target.checked;
+        updatePreview();
+      });
+
+      colorPicker.addEventListener('input', e => {
+        config.services[idx].accentColor = e.target.value;
+        updatePreview();
+      });
+
+      row.querySelector('.remove-btn').addEventListener('click', () => {
+        config.services.splice(idx, 1);
+        renderItems();
+        updatePreview();
+      });
+      
+      row.addEventListener('dragstart', () => { dragIdx = idx; row.style.opacity = '0.4'; });
+      row.addEventListener('dragend', () => { row.style.opacity = '1'; dragIdx = null; });
+      row.addEventListener('dragover', e => e.preventDefault());
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        if (dragIdx === null || dragIdx === idx) return;
+        const moved = config.services.splice(dragIdx, 1)[0];
+        config.services.splice(idx, 0, moved);
+        dragIdx = null;
+        renderItems();
+        updatePreview();
+      });
+      c.appendChild(row);
+    });
+  }
+
+  // === Редактор QR ===
+  function updateAddQrBtn() {
+    const btn = document.getElementById('addQrBtn');
+    document.getElementById('qrsCount').textContent = `Всего: ${config.qrs.length}`;
+    if (config.qrs.length >= MAX_QR) {
+      btn.disabled = true;
+      btn.textContent = '✕ Максимум ' + MAX_QR + ' QR-кода';
+    } else {
+      btn.disabled = false;
+      btn.textContent = '➕ Добавить QR-код';
+    }
+  }
+
+  function renderQrs() {
+    const c = document.getElementById('qrsContainer');
+    c.innerHTML = '';
+    config.qrs.forEach((qr, idx) => {
+      const div = document.createElement('div');
+      div.className = 'item-row';
+      div.style.flexDirection = 'column';
+      div.style.alignItems = 'flex-start';
+      div.style.cursor = 'default';
+      
+      div.innerHTML = `
+        <div style="display:flex; width:100%; gap:10px; align-items:center; margin-bottom:5px;">
+          <span style="color:#ffd200; font-weight:bold; font-size:12px;">QR ${idx+1}</span>
+          <input type="file" class="qr-file" accept="image/png,image/jpeg,image/webp,image/gif" style="flex:1; font-size:11px;">
+          <button class="remove-btn qr-remove">✕</button>
+        </div>
+        <input type="text" class="qr-title" placeholder="Заголовок" value="${esc(qr.title)}" style="margin-bottom:5px;" spellcheck="false" autocomplete="off">
+        <input type="text" class="qr-subtext" placeholder="Подпись" value="${esc(qr.subtext)}" spellcheck="false" autocomplete="off">
+        ${qr.image ? `<img src="${esc(qr.image)}" style="max-height:40px; margin-top:8px; border-radius:4px;">` : ''}
+      `;
+      
+      div.querySelector('.qr-file').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type || !/^image\/(png|jpeg|webp|gif)$/i.test(file.type)) {
+          alert('Выбери изображение PNG, JPG, WEBP или GIF.');
+          e.target.value = '';
+          return;
+        }
+        if (file.size > MAX_QR_FILE_SIZE) {
+          alert('Файл больше 1 МБ. Уменьши изображение и попробуй снова.');
+          e.target.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = ev => {
+          if (typeof ev.target.result !== 'string' || !validQrImage(ev.target.result)) {
+            alert('Не удалось обработать изображение QR-кода.');
+            return;
+          }
+          config.qrs[idx].image = ev.target.result;
+          renderQrs();
+          updatePreview();
+        };
+        reader.onerror = () => alert('Ошибка чтения файла изображения.');
+        reader.readAsDataURL(file);
+      });
+      div.querySelector('.qr-title').addEventListener('input', e => { config.qrs[idx].title = e.target.value; updatePreview(); });
+      div.querySelector('.qr-subtext').addEventListener('input', e => { config.qrs[idx].subtext = e.target.value; updatePreview(); });
+      div.querySelector('.qr-remove').addEventListener('click', () => { config.qrs.splice(idx, 1); renderQrs(); updatePreview(); });
+      
+      c.appendChild(div);
+    });
+    updateAddQrBtn();
+  }
+
+  // === Числовые поля: не «прыгают» при вводе ===
+  function bindNumericInput(id, prop, min, max, isFloat = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener('input', () => {
+      const raw = el.value.trim();
+      if (raw === '') return;
+      const parsed = isFloat ? Number.parseFloat(raw) : Number.parseInt(raw, 10);
+      if (!Number.isFinite(parsed)) return;
+      // Обновляем конфиг только если значение в допустимом диапазоне
+      if (parsed >= min && parsed <= max) {
+        config[prop] = parsed;
+        updatePreview();
+      }
+    });
+
+    el.addEventListener('blur', () => {
+      let parsed = isFloat ? Number.parseFloat(el.value) : Number.parseInt(el.value, 10);
+      if (!Number.isFinite(parsed)) parsed = config[prop];
+      parsed = Math.min(max, Math.max(min, parsed));
+      config[prop] = parsed;
+      el.value = parsed;
+      updatePreview();
+    });
+  }
+
+  // === Обычные (строковые) поля ===
+  function bindValue(id, prop) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', e => {
+      config[prop] = e.target.value;
+      updatePreview();
+    });
+  }
+
+  bindNumericInput('widgetWidth', 'widgetWidth', 200, 800);
+  bindNumericInput('widgetFontSize', 'widgetFontSize', 10, 30);
+  bindNumericInput('itemsPerPage', 'itemsPerPage', 1, 30);
+  bindNumericInput('timePerPage', 'timePerPage', 2, 60);
+  bindNumericInput('priceStrokeWidth', 'priceStrokeWidth', 0, 5, true);
+
+  bindValue('widgetFontFamily', 'widgetFontFamily');
+  bindValue('widgetTextColor', 'widgetTextColor');
+  bindValue('priceTextColor', 'priceTextColor');
+  bindValue('priceBgColor', 'priceBgColor');
+  bindValue('priceStrokeColor', 'priceStrokeColor');
+  bindValue('qrLayout', 'qrLayout');
+
+  document.getElementById('widgetOpacity').addEventListener('input', e => {
+    config.widgetOpacity = parseInt(e.target.value, 10);
+    document.getElementById('opacityVal').textContent = config.widgetOpacity;
+    updatePreview();
+  });
+
+  // Глобальный цвет акцента — применяется ко ВСЕМ услугам
+  document.getElementById('accentColor').addEventListener('input', e => {
+    config.accentColor = e.target.value;
+    config.services.forEach(svc => { svc.accentColor = config.accentColor; });
+    renderItems();
+    updatePreview();
+  });
+  
+  document.getElementById('priceMode').addEventListener('change', e => {
+    config.priceMode = e.target.value;
+    renderItems();
+    updatePreview();
+  });
+
+  const autoHideInput = document.getElementById('autoHide');
+  const hideTimeInput = document.getElementById('hideTime');
+  const hideTimeWrap = document.getElementById('hideTimeWrap');
+  
+  autoHideInput.addEventListener('change', e => {
+    config.autoHide = e.target.checked;
+    hideTimeInput.disabled = !config.autoHide;
+    hideTimeWrap.style.opacity = config.autoHide ? '1' : '0.5';
+    updatePreview();
+  });
+  
+  // Время скрытия
+  hideTimeInput.addEventListener('input', () => {
+    const raw = hideTimeInput.value.trim();
+    if (raw === '') return;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed)) return;
+    if (parsed >= 1 && parsed <= 300) {
+      config.hideTime = parsed;
+      updatePreview();
+    }
+  });
+  hideTimeInput.addEventListener('blur', () => {
+    let parsed = Number.parseInt(hideTimeInput.value, 10);
+    if (!Number.isFinite(parsed)) parsed = config.hideTime;
+    parsed = Math.min(300, Math.max(1, parsed));
+    config.hideTime = parsed;
+    hideTimeInput.value = parsed;
+    updatePreview();
+  });
+
+  document.getElementById('addItemBtn').addEventListener('click', () => {
+    config.services.push({ name: "Новая услуга", price: "", isAccent: false, accentColor: config.accentColor }); 
+    renderItems(); updatePreview(); 
+  });
+  
+  document.getElementById('addQrBtn').addEventListener('click', () => {
+    if (config.qrs.length >= MAX_QR) return;
+    config.qrs.push({ image: "", title: "ДОНАТ ПО QR", subtext: "Поддержи стрим" });
+    renderQrs(); updatePreview();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm("Вы уверены, что хотите сбросить все настройки? Ваши услуги и настройки будут удалены.")) {
+      localStorage.removeItem('obsWidgetConfig');
+      location.reload();
+    }
+  });
+
+  // === Генерация финального файла ===
+  function buildFinalHTML() {
+    const exportConfig = normalizeConfig(config);
+    const widgetHTML = buildWidgetHTML(exportConfig);
+    const configJSON = JSON.stringify(exportConfig).replace(/</g, '\\u003c');
+
+    const css = `
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { background:transparent; font-family:"Segoe UI",sans-serif; padding:10px; overflow:hidden; }
+      
+      .obs-widget-wrapper {
+        display: flex; flex-direction: column; gap: 15px;
+        opacity: var(--widget-opacity, 1);
+        transition: opacity 0.45s ease, transform 0.45s ease;
+        transform: translateY(0);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .obs-price-card {
+        background: rgba(15,15,20,0.85); 
+        border: 2px solid rgba(255,255,255,0.15); 
+        border-radius: 16px; 
+        padding: 20px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+      }
+      
+      .obs-price-list { 
+        position: relative;
+        font-weight: 600; 
+        width: 100%;
+        transition: height 0.45s ease;
+      }
+      .obs-page {
+        position: absolute;
+        top: 0; left: 0; width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+        pointer-events: none;
+      }
+      .obs-page.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .obs-price-item { 
+        padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05); 
+        display: flex; justify-content: space-between; align-items: center; gap: 10px;
+        line-height: 1.2;
+      }
+      .obs-price-item:last-child { border-bottom:none; }
+      .obs-text-accent { color: var(--accent-color, #ff4747) !important; }
+      
+      .obs-price-badge {
+        background: var(--price-bg);
+        color: var(--price-color);
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.95em;
+        font-weight: 700;
+        white-space: nowrap;
+        display: inline-block;
+        -webkit-text-stroke: var(--price-stroke-width, 0px) var(--price-stroke-color, transparent);
+        paint-order: stroke fill;
+      }
+      
+      .obs-qr-container { display: grid; width: 100%; }
+      .obs-qr-block { 
+        grid-area: 1 / 1;
+        background: rgba(15,15,20,0.85); 
+        border: 2px solid rgba(255,255,255,0.15); 
+        border-radius: 16px; padding: 12px 20px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        display: flex; align-items: center; gap: 15px; 
+        opacity: 0; transition: opacity 0.45s ease; pointer-events: none;
+        box-sizing: border-box;
+      }
+      .obs-qr-block.active { opacity: 1; pointer-events: auto; }
+      .obs-qr-block img { width: 90px; height: 90px; border-radius: 8px; background: #fff; padding: 4px; flex-shrink: 0; object-fit: contain; }
+      .obs-qr-text { font-weight: 700; line-height: 1.3; }
+      .obs-qr-text span { display: block; font-weight: 400; opacity: 0.7; margin-top: 4px; }
+      
+      .obs-qr-block.vertical {
+        flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        padding: 16px 20px; gap: 10px; width: max-content; max-width: 100%; justify-self: center;
+      }
+    `;
+
+    const timingJS = `
+      (function() {
+        var cfg = JSON.parse(document.getElementById("__cfg").textContent);
+        var pageEls = document.querySelectorAll(".obs-page");
+        var qrEls = document.querySelectorAll(".obs-qr-block");
+        var w = document.getElementById("obsWidget");
+        var listWrapper = document.querySelector(".obs-price-list");
+        
+        if (!w || pageEls.length === 0 || !listWrapper) return;
+        
+        var totalPages = pageEls.length;
+        var totalQrs = qrEls.length;
+        var maxSlides = Math.max(totalPages, totalQrs > 0 ? totalQrs : 1);
+        
+        var tp = cfg.timePerPage * 1000;
+        var hide = Math.max(cfg.hideTime * 1000, maxSlides * tp); 
+        var cur = 0;
+
+        setTimeout(function() {
+          if (pageEls[0]) {
+            listWrapper.style.height = pageEls[0].offsetHeight + 'px';
+          }
+        }, 150);
+
+        function showSlide(index) {
+          var pIdx = index % totalPages;
+          var qIdx = index % totalQrs;
+
+          pageEls.forEach(function(p, i) {
+            if (i === pIdx) p.classList.add('active');
+            else p.classList.remove('active');
+          });
+          
+          if (totalQrs > 0) {
+            qrEls.forEach(function(q, i) {
+              if (i === qIdx) q.classList.add('active');
+              else q.classList.remove('active');
+            });
+          }
+
+          listWrapper.style.height = pageEls[pIdx].offsetHeight + 'px';
+        }
+
+        function loop() {
+          showSlide(cur);
+          
+          setTimeout(function() {
+            cur++;
+            if (cur < maxSlides) { 
+              loop(); 
+            } else { 
+              if (cfg.autoHide) {
+                w.style.opacity = "0"; 
+                w.style.transform = "translateY(10px)";
+                
+                setTimeout(function() {
+                  w.style.display = "none"; 
+                  setTimeout(function() { 
+                    cur = 0; 
+                    w.style.display = "flex";
+                    void w.offsetWidth; 
+                    w.style.opacity = "var(--widget-opacity, 1)";
+                    w.style.transform = "translateY(0)";
+                    loop(); 
+                  }, hide); 
+                }, 450);
+              } else {
+                cur = 0;
+                loop();
+              }
+            }
+          }, tp); 
+        }
+        
+        w.style.display = "flex";
+        loop();
+      })();
+    `;
+
+    return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>OBS Widget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto+Mono:wght@400;700&family=Roboto:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+  <style>${css}</style>
+</head>
+<body>
+  ${widgetHTML}
+  <script id="__cfg" type="application/json">${configJSON}<\/script>
+  <script>${timingJS}<\/script>
+</body>
+</html>`;
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const finalHTML = buildFinalHTML();
+    const nameRaw = (document.getElementById('saveFilename').value || 'widget.html').trim();
+    const filename = /\.html?$/i.test(nameRaw) ? nameRaw : nameRaw + '.html';
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: 'HTML файл', accept: { 'text/html': ['.html', '.htm'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(finalHTML);
+        await writable.close();
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        console.warn('showSaveFilePicker недоступен:', err);
+      }
+    }
+
+    const blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  // === Инициализация ===
+  function syncUI() {
+    document.getElementById('widgetWidth').value = config.widgetWidth;
+    document.getElementById('widgetFontSize').value = config.widgetFontSize;
+    document.getElementById('widgetFontFamily').value = config.widgetFontFamily;
+    document.getElementById('widgetTextColor').value = config.widgetTextColor;
+    document.getElementById('widgetOpacity').value = config.widgetOpacity;
+    document.getElementById('opacityVal').textContent = config.widgetOpacity;
+    document.getElementById('accentColor').value = config.accentColor;
+    
+    document.getElementById('itemsPerPage').value = config.itemsPerPage;
+    document.getElementById('timePerPage').value = config.timePerPage;
+    document.getElementById('hideTime').value = config.hideTime;
+    document.getElementById('autoHide').checked = config.autoHide;
+    
+    hideTimeInput.disabled = !config.autoHide;
+    hideTimeWrap.style.opacity = config.autoHide ? '1' : '0.5';
+
+    document.getElementById('priceMode').value = config.priceMode;
+    document.getElementById('priceTextColor').value = config.priceTextColor;
+    document.getElementById('priceBgColor').value = config.priceBgColor;
+    document.getElementById('priceStrokeColor').value = config.priceStrokeColor;
+    document.getElementById('priceStrokeWidth').value = config.priceStrokeWidth;
+
+    document.getElementById('qrLayout').value = config.qrLayout;
+  }
+
+  syncUI();
+  renderItems();
+  renderQrs();
+  updatePreview();
+})();
+</script>
+</body>
+</html>
