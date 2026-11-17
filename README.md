@@ -22,7 +22,7 @@
 
 ⚠️ **Не добавляй в OBS файл настроек** — он только для настройки.
 
-📖 **[Подробная инструкция со скриншотами](https://DaRi1925.github.io/obs-price-widget/instruction.html)**
+📖 **[Подробная инструкция со скриншотами](https://sabrbala.github.io/obs-widget/instruction.html)**
 
 ## ⚙️ Возможности
 
